@@ -30,9 +30,9 @@ public class JPAConfig {
     public DataSource dataSource() {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://127.0.0.1:3307/jpa?characterEncoding=UTF-8");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/day4?characterEncoding=UTF-8");
         dataSource.setUsername("root");
-        dataSource.setPassword("admin");
+        dataSource.setPassword("toan982003");
         return dataSource;
     }
 
