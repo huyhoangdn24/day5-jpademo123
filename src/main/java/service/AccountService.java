@@ -20,6 +20,21 @@ public class AccountService {
     public AccountService(JpaTransactionManager transactionManager){
         this.transactionManager = transactionManager;
     }
-    public AccountService(){
+    public   void transferMoney(int sourceAccountId, int targetAccountId,double amount){
+        TransactionDefinition definition = new DefaultTransactionDefinition();
+        TransactionStatus status = transactionManager.getTransaction(definition);
+        try {
+            AccountEntity sourceAccount = accountRepository.findById(sourceAccountId).get();
+            AccountEntity targetAccount = accountRepository.findById(targetAccountId).get();
+            sourceAccount.setBalance(sourceAccount.getBalance() - amount);
+            sourceAccount.setBalance(targetAccount.getBalance() - amount);
+            accountRepository.save(sourceAccount);
+            accountRepository.save(targetAccount);
+            transactionManager.commit(status);
+
+        }catch (Exception exception){
+            transactionManager.rollback(status);
+            throw new RuntimeException(exception);
+        }
     }
 }
