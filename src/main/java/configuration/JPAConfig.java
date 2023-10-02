@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package configuration;
 
 import org.springframework.context.annotation.Bean;
@@ -30,9 +26,9 @@ public class JPAConfig {
     public DataSource dataSource() {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/day4?characterEncoding=UTF-8");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/jpa-demo?characterEncoding=UTF-8");
         dataSource.setUsername("root");
-        dataSource.setPassword("toan982003");
+        dataSource.setPassword("123456");
         return dataSource;
     }
 

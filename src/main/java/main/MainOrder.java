@@ -5,90 +5,38 @@ import entity.Order;
 import entity.OrderDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.data.domain.Sort;
-import repository.BookRepository;
-import repository.CategoryRepository;
-import repository.OrderDetailsRepository;
+
 import repository.OrderRepository;
-import service.OrderDetailsService;
 import service.OrderService;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-
-
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class MainOrder {
     static ApplicationContext context = new AnnotationConfigApplicationContext(JPAConfig.class);
-    static OrderService orderService =context .getBean(OrderService.class);
-    static OrderDetailsService orderDetailsService = (OrderDetailsService) context.getBean("OrderDetailsService");
+    static OrderRepository orderService =context .getBean(OrderRepository.class);
+
 
 
     public static void main(String[] args) {
-        Scanner sc=new Scanner(System.in);
-        while (true) {
-            System.out.println("1. Insert Order");
-            System.out.println("2. List All Orders");
-            System.out.println("3. Get an order and orderDetails by order id");
-            System.out.println("4.List all the orders in the current month");
-            System.out.println("5. List Orders with Total Amount > 1000");
-            System.out.println("6. List Orders with Java Book");
-            System.out.println("7. Exit");
-            System.out.print("Enter your choice: ");
+//        insertorder();
+        //        createNewOrdersEntry();
+//        findAll();
 
-            int choice = sc.nextInt();
-            sc.nextLine();
-
-            switch (choice) {
-                case 1:
-                    insertorder();
-                    break;
-
-                case 2:
-                    findAllOrders();
-                    break;
-                case 3:
-                    System.out.println("Enter id of order That you want to find!");
-                    Long id=sc.nextLong();
-                    sc.nextLine();
-                    findAllById( id);
-                    break;
-                case 4:
-                    findAllCurrentMonth();
-                    break;
-                case 5:
-                    findOrdersByTotalAmountGreaterThan(1000.0);
-                    break;
-                case 6 :
-                    findAllByOrderDetailWithProduct("Java Book");
-                    break;
-                case 7:
-                    System.out.println("Exiting...");
-                    sc.close();
-                    System.exit(0);
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-        }
+        findAllWithCurrentMonth();
+//        findAllByProductName("huy hoang");
+//        findAllByPriceGreaterThan(1000);
     }
-    public static  void  insertorder(){
+    private static  void  insertorder(){
         Order order = new Order();
         order.setOrderDate(new Date());
         order.setCustomerName("Customer 1");
         order.setCustomerAddress("Address 1");
         orderService.save(order);
-        // oder deatails
-        OrderDetails details = new OrderDetails();
-        details.setProductName("Product A");
-        details.setQuantity(5);
-        details.setUnitPrice(10.0);
-        orderDetailsService.save(details);
+
     }
 
-    public static void findAllOrders() {
+    private static void findAllOrders() {
         List<Order> orders = orderService.findAllOrders();
         if (!orders.isEmpty()) {
             for (Order order : orders) {
@@ -102,7 +50,7 @@ public class MainOrder {
             System.out.println("Order not found");
         }
     }
-    public static void  findAllById(Long id){
+    private static void  findAllById(Long id){
         Optional<Order> orders = orderService.findById(id);
         if (orders.isPresent()) {
             Order order = orders.get();
@@ -112,38 +60,38 @@ public class MainOrder {
             System.out.println("Not found any order with id is " + id);
         }
     }
-    public static void findAllCurrentMonth(){
+    private static void findAllWithCurrentMonth(){
         LocalDate currentDate = LocalDate.now();
-        int currentMonth = currentDate.getMonthValue();
-        int currentYear = currentDate.getYear();
-        List<Order> currentMonthOrders = orderService.findAllCurrentMonth(currentMonth, currentYear);
-        if (!currentMonthOrders.isEmpty()) {
-            for (Order order : currentMonthOrders) {
-                System.out.println("Order: " + order);
-                List<OrderDetails> orderDetails = order.getOrderDetail();
-                for (OrderDetails detail : orderDetails) {
-                    System.out.println("Detail: " + detail);
-                }
+        Integer month = currentDate.getMonthValue();
+        List<Order> orders = OrderService.findAllByOrderDate_Month(month);
+        if(!orders.isEmpty()){
+            System.out.println("List all the orders in the current month "+month);
+            for(Order order:orders){
+                System.out.println(order);
+                order.getOrderDetail();
             }
         } else {
-            System.out.println("No orders found for the current month.");
+            System.out.println("Not found order in the current month "+month);
         }
     }
-    public static void  findOrdersByTotalAmountGreaterThan(Double price){
-        List<Order> ordersWithTotalAmountGreaterThan = orderService.findOrdersByTotalAmountGreaterThan(price);
-
-        if (ordersWithTotalAmountGreaterThan.isEmpty()) {
-            System.out.println("No orders with a greater total value were found " + price + " USD.");
+    private static void  findOrdersByTotalAmountGreaterThan(Double price){
+        List<Order> ordersEntityList = OrderService.findAll();
+        Map<Order,Double> map=new HashMap<>();
+        for (Order order: ordersEntityList){
+            List<OrderDetails> orderDetails = (List<OrderDetails>) order.getOrderDetail();
+            double total= orderDetails.stream().mapToDouble(orderDetail->orderDetail.getUnitPrice()*orderDetail.getQuantity()).sum();
+            if(total>price) map.put(order,total);
+        }
+        if(!map.isEmpty()){
+            System.out.println("List all orders which have total amount more than 1,000USD");
+            map.forEach((order,total)->
+                    System.out.println(order + " with total "+ total));
         } else {
-            System.out.println("List of orders with a larger total value " + price + " USD:");
-            for (Order order : ordersWithTotalAmountGreaterThan) {
-                System.out.println("Order: " + order);
-            }
+            System.out.println("Not found list all orders which have total amount more than 1,000USD");
         }
-
     }
-    public static void  findAllByOrderDetailWithProduct( String name ){
-        List<Order> orders=orderService.findAllByOrderDetailWithProduct(name);
+    public static void findAllByProductName(String name){
+        List<Order> orders=OrderService.findAllByOrderDetailProductName(name);
         if(!orders.isEmpty()){
             System.out.println(String.format("List all orders buy %s book", name));
             System.out.println(orders);

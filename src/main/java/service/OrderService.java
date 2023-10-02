@@ -2,43 +2,31 @@ package service;
 
 import entity.Order;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.stereotype.Service;
 import repository.OrderRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-
+@Service
 public class OrderService {
     @Autowired
-    JpaTransactionManager jpaTransactionManager;
-
-    @Autowired
-    static OrderRepository orders;
-    public static Order insertorder(Order order){
-        return orders.save(order);
+    static OrderRepository orderRepository;
+    public static List<Order> findAllByOrderDate_Month(Integer month) {
+        return orderRepository.findAllByOrderDate_Month(month);
     }
 
-
-    public void save(Order orderService) {
+    public static List<Order> findAllByOrderDetailProductName(String name) {
+       return orderRepository.findAllByOrderDetailProductName(name);
+    }
+    public static Optional<Order> findAllById(Long id){
+        return orderRepository.findById(id);
+    }
+    public static List<Order> findAllOrders(){
+        return orderRepository.findAllOrders();
     }
 
-    public Optional<Order> findById(Long id){
-
-        return orders.findById(id);
-    }
-    public List<Order> findAllOrders() {
-        return orders.findAllOrders();
-    }
-    public List<Order> findAllCurrentMonth(int currentMonth, int currentYear) {
-        return orders.findAllCurrentMonth(currentMonth,currentYear);
-    }
-
-    public List<Order> findAllByOrderDetailWithProduct(String name) {
-        return orders.findAllByOrderDetailWithProduct(name);
-    }
-
-    public List<Order> findOrdersByTotalAmountGreaterThan(Double price) {
-        return orders.findOrdersByTotalAmountGreaterThan(price);
+    public static List<Order> findAll() {
+        return (List<Order>) orderRepository.findAll();
     }
 }
